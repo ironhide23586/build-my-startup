@@ -19,6 +19,8 @@ from ..pretty_print import print_code, print_review, print_status
 from ..progress import ProgressSpinner, print_step
 from ..git_integration import GitManager, ensure_git_available
 from ..testing_utils import test_file_by_type, generate_fix_prompt
+from ..file_type_validator import get_file_type_instructions
+from ..runtime_testing import smart_runtime_test
 
 
 @dataclass
@@ -164,15 +166,21 @@ class StandardBuildPipeline:
             
             self.tracker.create_task(task_id)
             
+            # Get file type specific instructions
+            from ..file_type_validator import get_file_type_instructions
+            file_type_instructions = get_file_type_instructions(task)
+            
             enhanced_description = f"""{description}
 
+{file_type_instructions}
+
 CRITICAL FORMATTING REQUIREMENTS:
-- Generate ONLY the code file content, NO explanations, NO markdown
-- Do NOT wrap code in ```python blocks
-- Start directly with imports if Python file, or <!DOCTYPE if HTML
+- Generate ONLY the file content, NO explanations, NO markdown
+- Do NOT wrap in ```python or ```json blocks
+- Start directly with appropriate content for file type
 - Do NOT include "Here is..." or "Here's..." introductions
-- Return ONLY the raw code that would go directly into the file
-- The code must be complete, executable, and ready to save
+- Return ONLY the raw content that would go directly into the file
+- Content must be complete, valid, and ready to save
 
 Output ONLY the file contents."""
             
@@ -197,6 +205,40 @@ Output ONLY the file contents."""
                     writer.agent_id,
                     writer.agent_id,
                     {"file": task, "task_id": fix_task_id, "description": desc},
+                    "improve_code_request"
+                ))
+                return
+            
+            # Validate file type before saving
+            from ..file_type_validator import validate_file_content
+            is_valid, corrected_content, validation_issues = validate_file_content(task, code)
+            
+            if not is_valid:
+                print(f"⚠️  File type mismatch for {task}: {validation_issues}", flush=True)
+                print(f"🔧 Auto-correcting to proper format...", flush=True)
+                code = corrected_content
+                
+                # Save corrected version and trigger re-review
+                self.generated_files[task] = code
+                self.save_version(task, code)
+                
+                # Request CodeWriter to regenerate properly
+                fix_task_id = f"fix_filetype_{task}"
+                self.tracker.create_task(fix_task_id)
+                asyncio.create_task(self.bus.send_to_agent(
+                    writer.agent_id,
+                    writer.agent_id,
+                    {
+                        "file": task,
+                        "task_id": fix_task_id,
+                        "description": f"""Regenerate {task} with correct content type.
+                        
+Issues: {validation_issues}
+
+{get_file_type_instructions(task)}
+
+Generate proper content for this file type. Return ONLY the file content."""
+                    },
                     "improve_code_request"
                 ))
                 return
