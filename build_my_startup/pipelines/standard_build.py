@@ -6,6 +6,7 @@ import shutil
 from typing import Dict, List, Optional, Callable
 from dataclasses import dataclass, field
 
+from ..config_manager import get_config, config as global_config
 from ..message_bus import MessageBus
 from ..agent import Message
 from ..agents_registry import create_default_agents, register_agents, start_agents, stop_agents
@@ -24,19 +25,40 @@ from ..testing_utils import test_file_by_type, generate_fix_prompt
 class BuildConfig:
     """Configuration for the standard build pipeline."""
     output_dir: str
-    max_fix_attempts: int = 3
-    max_iterations_per_file: int = 5
-    safe_commands_allowed: bool = True
-    timeout: float = 300.0
-    poll_interval: float = 1.0
-    show_progress: bool = True
-    generate_plan: bool = True
+    # Load defaults from config.json
+    max_fix_attempts: int = None
+    max_iterations_per_file: int = None
+    safe_commands_allowed: bool = None
+    timeout: float = None
+    poll_interval: float = None
+    show_progress: bool = None
+    generate_plan: bool = None
     templates_dir: Optional[str] = None
     static_dir: Optional[str] = None
-    enable_git: bool = True  # Enable git integration
-    use_ai_commit_messages: bool = True  # Use AI for commit messages
+    enable_git: bool = None
+    use_ai_commit_messages: bool = None
     
     def __post_init__(self):
+        # Load from config.json if not explicitly set
+        if self.max_fix_attempts is None:
+            self.max_fix_attempts = get_config("build_settings.max_fix_attempts", 3)
+        if self.max_iterations_per_file is None:
+            self.max_iterations_per_file = get_config("build_settings.max_iterations_per_file", 5)
+        if self.safe_commands_allowed is None:
+            self.safe_commands_allowed = get_config("build_settings.safe_commands_allowed", True)
+        if self.timeout is None:
+            self.timeout = get_config("build_settings.timeout", 600.0)
+        if self.poll_interval is None:
+            self.poll_interval = get_config("build_settings.poll_interval", 1.0)
+        if self.show_progress is None:
+            self.show_progress = get_config("build_settings.show_progress", True)
+        if self.generate_plan is None:
+            self.generate_plan = get_config("build_settings.generate_plan", True)
+        if self.enable_git is None:
+            self.enable_git = get_config("build_settings.enable_git", True)
+        if self.use_ai_commit_messages is None:
+            self.use_ai_commit_messages = get_config("build_settings.use_ai_commit_messages", True)
+        
         if self.templates_dir is None:
             self.templates_dir = os.path.join(self.output_dir, "templates")
         if self.static_dir is None:

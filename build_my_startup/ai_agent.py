@@ -6,6 +6,8 @@ import os
 from typing import Optional, Dict, Any
 from .agent import Agent, Message
 from .message_bus import MessageBus
+from .config_manager import get_api_key, get_model, get_config
+# Legacy imports for backward compatibility
 from .config import OPENAI_API_KEY, DEFAULT_MODEL, AGENT_DEFAULT_TEMPERATURE
 
 # Try to import OpenAI - make it optional for basic usage
@@ -32,9 +34,12 @@ class AIAgent(Agent):
     ):
         super().__init__(agent_id=agent_id, name=name)
         self.role = role
-        self.model = model or DEFAULT_MODEL
-        # Use provided key, env var, or config default (in that order)
-        self.api_key = api_key or os.getenv("OPENAI_API_KEY") or OPENAI_API_KEY
+        
+        # Get model from config.json or fall back to legacy
+        self.model = model or get_model("code_generation") or DEFAULT_MODEL
+        
+        # Get API key: provided > env var > config.json > legacy config.py
+        self.api_key = api_key or get_api_key("openai") or OPENAI_API_KEY
         self.system_prompt = system_prompt or f"You are a helpful {role} agent."
         self.message_bus = message_bus
         self.conversation_history: list = []
@@ -62,11 +67,16 @@ class AIAgent(Agent):
         # Add current prompt
         messages.append({"role": "user", "content": prompt})
         
+        # Get temperature and max_tokens from config
+        temperature = get_config("model_preferences.temperature", AGENT_DEFAULT_TEMPERATURE)
+        max_tokens = get_config("model_preferences.max_tokens", 4096)
+        
         try:
             response = await self.client.chat.completions.create(
                 model=self.model,
                 messages=messages,
-                temperature=AGENT_DEFAULT_TEMPERATURE
+                temperature=temperature,
+                max_tokens=max_tokens
             )
             result = response.choices[0].message.content
             

@@ -13,6 +13,7 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 
 from .standard_build import StandardBuildPipeline, BuildConfig
+from ..config_manager import get_config
 from ..message_bus import MessageBus
 from ..agent import Message
 from ..agents_registry import create_default_agents, register_agents, start_agents, stop_agents
@@ -23,9 +24,20 @@ from ..progress import ProgressSpinner, print_step, print_status, print_phase
 @dataclass
 class AdaptiveBuildConfig(BuildConfig):
     """Extended configuration for adaptive builds."""
-    ideation_timeout: float = 60.0
-    min_files: int = 2
-    max_files: int = 10
+    ideation_timeout: float = None
+    min_files: int = None
+    max_files: int = None
+    
+    def __post_init__(self):
+        super().__post_init__()
+        
+        # Load from config.json if not explicitly set
+        if self.ideation_timeout is None:
+            self.ideation_timeout = get_config("ideation_settings.ideation_timeout", 60.0)
+        if self.min_files is None:
+            self.min_files = get_config("ideation_settings.min_files", 4)
+        if self.max_files is None:
+            self.max_files = get_config("ideation_settings.max_files", 12)
 
 
 class AdaptiveBuildPipeline:

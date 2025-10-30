@@ -1,0 +1,146 @@
+{
+  "_comment": "Master Configuration for Build My Startup Framework",
+  "_instructions": "1. Copy this file to config.json, 2. Fill in your API keys, 3. Adjust settings as needed",
+  
+  "api_keys": {
+    "_comment": "API keys for AI providers - alternatively set as environment variables",
+    "openai": "YOUR_OPENAI_API_KEY_HERE",
+    "anthropic": "YOUR_ANTHROPIC_API_KEY_HERE",
+    "aws_access_key_id": "YOUR_AWS_ACCESS_KEY_HERE",
+    "aws_secret_access_key": "YOUR_AWS_SECRET_KEY_HERE",
+    "aws_region": "us-east-1"
+  },
+  
+  "default_models": {
+    "_comment": "Which AI model to use for each task type",
+    "code_generation": "gpt-4o-mini",
+    "code_review": "gpt-4o-mini",
+    "test_generation": "gpt-4o-mini",
+    "planning": "gpt-4o",
+    "ideation": "gpt-4o",
+    "git_commits": "gpt-4o-mini",
+    "reasoning": "o1-mini",
+    "vision": "gpt-4o",
+    
+    "_available_openai": ["gpt-4o", "gpt-4o-mini", "gpt-4-turbo", "o1-preview", "o1-mini"],
+    "_available_claude": ["claude-3-5-sonnet-20241022", "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+    "_available_aws": ["anthropic.claude-3-5-sonnet-20241022-v2:0", "anthropic.claude-3-opus-20240229-v1:0"]
+  },
+  
+  "model_preferences": {
+    "_comment": "Global preferences for AI model behavior",
+    "provider_preference": "openai",
+    "budget_level": "medium",
+    "temperature": 0.3,
+    "max_tokens": 4096,
+    "enable_streaming": false
+  },
+  
+  "build_settings": {
+    "_comment": "Settings for the build pipeline",
+    "max_fix_attempts": 3,
+    "max_iterations_per_file": 5,
+    "timeout": 600,
+    "poll_interval": 1.0,
+    "show_progress": true,
+    "generate_plan": true,
+    "enable_git": true,
+    "use_ai_commit_messages": true,
+    "safe_commands_allowed": true
+  },
+  
+  "ideation_settings": {
+    "_comment": "Settings for AI ideation and architecture inference",
+    "ideation_timeout": 60,
+    "min_files": 4,
+    "max_files": 12,
+    "prefer_microservices": false,
+    "include_tests_directory": true
+  },
+  
+  "testing_settings": {
+    "_comment": "Settings for automated testing",
+    "run_frontend_tests": true,
+    "run_backend_tests": true,
+    "run_integration_tests": true,
+    "test_timeout": 30,
+    "use_specialized_agents": true,
+    "generate_test_files": true,
+    "run_in_sandbox": true
+  },
+  
+  "deployment_settings": {
+    "_comment": "Settings for deployment and packaging",
+    "python_version": "3.11",
+    "default_port": 5000,
+    "create_dockerfile": true,
+    "create_docker_compose": false,
+    "build_wheel": false,
+    "build_sdist": false,
+    "generate_setup_py": false,
+    "generate_pyproject_toml": false
+  },
+  
+  "git_settings": {
+    "_comment": "Settings for git integration",
+    "auto_init": true,
+    "commit_after_generation": true,
+    "commit_after_testing": true,
+    "commit_after_fixes": true,
+    "batch_commit_at_end": true,
+    "create_branches_for_features": false,
+    "use_conventional_commits": true
+  },
+  
+  "paths": {
+    "_comment": "Directory paths used by the framework",
+    "apps_dir": "apps",
+    "examples_dir": "examples",
+    "docs_dir": "docs",
+    "sandbox_prefix": "/tmp/build_sandbox_",
+    "venv_dir": "venv"
+  },
+  
+  "safety": {
+    "_comment": "Security and safety settings",
+    "safe_commands_allowed": true,
+    "block_dangerous_patterns": true,
+    "validate_code_safety": true,
+    "sandbox_execution": true,
+    "max_file_size_mb": 10,
+    "allowed_file_types": [".py", ".html", ".css", ".js", ".json", ".txt", ".md"]
+  },
+  
+  "agent_settings": {
+    "_comment": "Settings for AI agents behavior",
+    "enable_verbose_logging": true,
+    "show_agent_messages": true,
+    "track_token_usage": true,
+    "enable_tool_access": true,
+    "max_retries": 3,
+    "retry_delay": 2
+  },
+  
+  "ui_settings": {
+    "_comment": "UI and display settings",
+    "use_colors": true,
+    "use_emojis": true,
+    "use_spinners": true,
+    "show_code_previews": true,
+    "max_code_preview_lines": 50,
+    "truncate_long_output": true
+  },
+  
+  "features": {
+    "_comment": "Feature flags to enable/disable framework capabilities",
+    "enable_adaptive_build": true,
+    "enable_standard_build": true,
+    "enable_git_integration": true,
+    "enable_docker_tools": true,
+    "enable_ai_tools": true,
+    "enable_frontend_testing": true,
+    "enable_backend_testing": true,
+    "enable_integration_testing": true
+  }
+}
+
