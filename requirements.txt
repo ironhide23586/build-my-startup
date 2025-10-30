@@ -4,3 +4,7 @@
 # Optional: For AI-powered agents
 openai>=1.0.0
 
+# Terminal formatting and code pretty printing
+rich>=13.0.0
+pygments>=2.15.0
+

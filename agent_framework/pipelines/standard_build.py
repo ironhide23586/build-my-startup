@@ -14,6 +14,7 @@ from ..code_extraction import extract_file_content
 from ..sandbox import prepend_test_setup, run_python
 from ..command_exec import execute_command_safe
 from ..code_safety import is_safe_code
+from ..pretty_print import print_code, print_review, print_status
 
 
 @dataclass
@@ -143,6 +144,11 @@ Output ONLY the file contents."""
             
             code = await writer.write_code(enhanced_description)
             
+            # Pretty print the generated code
+            print_status(f"\n✨ Generated code for: {task}", "success")
+            language = "python" if task.endswith(".py") else "html" if task.endswith(".html") else "javascript"
+            print_code(code, language=language, title=f"📄 {task}")
+            
             safe, violations = is_safe_code(task, code)
             if not safe:
                 fix_task_id = f"fix_safety_{task}"
@@ -191,6 +197,11 @@ Output ONLY the file contents."""
             improved_code = await writer.write_code(description)
             self.generated_files[file_task] = improved_code
             self.save_version(file_task, improved_code)
+            
+            # Pretty print the improved code
+            print_status(f"\n🔧 Code improved for: {file_task} (iteration {iteration})", "success")
+            language = "python" if file_task.endswith(".py") else "html" if file_task.endswith(".html") else "javascript"
+            print_code(improved_code, language=language, title=f"✨ Improved: {file_task}")
             
             state_info = await self.get_task_state(file_task)
             async with state_info["lock"]:
@@ -275,6 +286,10 @@ Fix the code to make tests pass and ensure proper integration."""
                     state_info["state"] = "reviewing"
             
             review = await reviewer.review_code(code, writer.agent_id)
+            
+            # Pretty print the code review
+            print_status(f"\n📝 Code review completed for: {file_task}", "info")
+            print_review(review, title=f"🔍 Review: {file_task}")
             
             state_info = await self.get_task_state(file_task)
             async with state_info["lock"]:
@@ -391,8 +406,17 @@ Generate complete test code ready to execute."""
                 result["errors"] = err
                 result["passed"] = rc == 0
                 
+                # Pretty print test result
+                if result["passed"]:
+                    print_status(f"\n✅ Tests PASSED for: {file_task}", "success")
+                else:
+                    print_status(f"\n❌ Tests FAILED for: {file_task}", "error")
+                    if result["errors"]:
+                        print_code(result["errors"], language="text", title=f"Test Errors: {file_task}")
+                
             except Exception as e:
                 result["errors"] = str(e)
+                print_status(f"\n⚠️  Test execution error for: {file_task}", "warning")
             
             self.test_results[file_task] = result
             self.tracker.complete_task(run_task_id)
