@@ -1,0 +1,10 @@
+[
+    {
+        "description": "Sample task 1",
+        "completed": false
+    },
+    {
+        "description": "Sample task 2",
+        "completed": true
+    }
+]

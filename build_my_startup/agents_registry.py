@@ -88,6 +88,41 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
         ),
     )
 
+    agents["FrontendTestAgent"] = CodeWriterAgent(
+        name="FrontendTestAgent",
+        message_bus=bus,
+        system_prompt=(
+            "You are an expert frontend testing engineer. You test HTML, CSS, and JavaScript files for correctness. "
+            "You have access to testing tools: test_html_file(), test_javascript_file(), test_css_file(). "
+            "You analyze test results, identify issues, and generate fixes. You understand browser compatibility, "
+            "DOM structure, CSS syntax, and JavaScript best practices. When tests fail, you provide clear, "
+            "actionable fixes. You iterate until all frontend tests pass."
+        ),
+    )
+
+    agents["BackendTestAgent"] = CodeWriterAgent(
+        name="BackendTestAgent",
+        message_bus=bus,
+        system_prompt=(
+            "You are an expert backend testing engineer. You test Python code for syntax, imports, and runtime errors. "
+            "You have access to testing tools: test_python_file(). You analyze test results, identify issues with "
+            "imports, logic errors, syntax problems, and runtime exceptions. You generate fixes that pass tests. "
+            "You understand Python best practices, error handling, and proper code structure. You iterate until "
+            "all backend tests pass."
+        ),
+    )
+
+    agents["IntegrationTestAgent"] = CodeWriterAgent(
+        name="IntegrationTestAgent",
+        message_bus=bus,
+        system_prompt=(
+            "You are an expert integration testing engineer. You verify that frontend and backend components work "
+            "together correctly. You check API endpoints, data flow, request/response formats, error handling, and "
+            "edge cases. You identify integration issues between components and suggest fixes. You ensure the entire "
+            "system works as a cohesive whole."
+        ),
+    )
+
     return agents
 
 

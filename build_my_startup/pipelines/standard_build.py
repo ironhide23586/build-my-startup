@@ -16,6 +16,8 @@ from ..command_exec import execute_command_safe
 from ..code_safety import is_safe_code
 from ..pretty_print import print_code, print_review, print_status
 from ..progress import ProgressSpinner, print_step
+from ..git_integration import GitManager, ensure_git_available
+from ..testing_utils import test_file_by_type, generate_fix_prompt
 
 
 @dataclass
@@ -31,6 +33,8 @@ class BuildConfig:
     generate_plan: bool = True
     templates_dir: Optional[str] = None
     static_dir: Optional[str] = None
+    enable_git: bool = True  # Enable git integration
+    use_ai_commit_messages: bool = True  # Use AI for commit messages
     
     def __post_init__(self):
         if self.templates_dir is None:
@@ -59,6 +63,13 @@ class StandardBuildPipeline:
         
         # Sandbox
         self.sandbox_dir = tempfile.mkdtemp(prefix="build_sandbox_")
+        
+        # Git integration
+        self.git_manager: Optional[GitManager] = None
+        if config.enable_git and ensure_git_available():
+            ai_agent = self.agents.get("CodeWriter") if config.use_ai_commit_messages else None
+            self.git_manager = GitManager(config.output_dir, ai_agent)
+            print("🔧 Git integration enabled with AI-generated commit messages", flush=True)
         
         # Setup
         self._setup_directories()
@@ -171,6 +182,16 @@ Output ONLY the file contents."""
             self.generated_files[task] = code
             self.save_version(task, code)
             
+            # Git commit (AI-generated message)
+            if self.git_manager:
+                asyncio.create_task(self.git_manager.commit_file(
+                    task,
+                    "CodeWriter",
+                    "generated",
+                    metadata={"safe": safe, "size": len(code)},
+                    code_preview=code[:500]
+                ))
+            
             state_info = await self.get_task_state(task)
             async with state_info["lock"]:
                 state_info["state"] = "reviewing"
@@ -253,6 +274,16 @@ Fix the code to make tests pass and ensure proper integration."""
             fixed_code = await writer.write_code(fix_description)
             self.generated_files[file_task] = fixed_code
             self.save_version(file_task, fixed_code)
+            
+            # Git commit fix
+            if self.git_manager:
+                asyncio.create_task(self.git_manager.commit_file(
+                    file_task,
+                    "CodeWriter",
+                    "fixed",
+                    metadata={"fix_attempt": fix_count, "previous_errors": test_result.get('errors', '')[:200]},
+                    code_preview=fixed_code[:500]
+                ))
             
             state_info = await self.get_task_state(file_task)
             async with state_info["lock"]:
@@ -432,6 +463,15 @@ Generate complete test code ready to execute."""
             
             current_code = self.generated_files.get(file_task, "")
             self.save_version(file_task, current_code, test_result=result)
+            
+            # Git commit test results
+            if self.git_manager and result["passed"]:
+                asyncio.create_task(self.git_manager.commit_file(
+                    file_task,
+                    "TestRunner",
+                    "tested",
+                    metadata={"test_passed": True, "test_rc": 0}
+                ))
             
             state_info = await self.get_task_state(file_task)
             async with state_info["lock"]:
@@ -858,6 +898,16 @@ Generate a comprehensive fix description."""
                 except Exception:
                     pass
             
+            # Final batch commit
+            if self.git_manager and saved_count > 0:
+                saved_files = [task_name for task_name in self.generated_files.keys()]
+                await self.git_manager.commit_multiple(
+                    saved_files,
+                    "BuildPipeline",
+                    "completed",
+                    summary=f"MVP complete - {saved_count} files generated and tested"
+                )
+            
             # Cleanup
             try:
                 shutil.rmtree(self.sandbox_dir)
@@ -869,7 +919,8 @@ Generate a comprehensive fix description."""
                 "generated": len(self.generated_files),
                 "tests": self.test_results,
                 "plan": self.plan_output.get("plan", ""),
-                "command_history": self.command_history
+                "command_history": self.command_history,
+                "git_enabled": self.git_manager is not None
             }
         
         try:
