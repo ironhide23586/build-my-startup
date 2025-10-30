@@ -1,6 +1,8 @@
-# Asynchronous Multi-Agent Communication System
+# Build My Startup
 
-A Python implementation for multiple agents to communicate asynchronously with each other. Perfect for building multi-agent AI systems like Cursor agents that need to collaborate.
+**A Fully Automated Open-Source AI-Powered Agentic Framework**
+
+Build your startup with AI Employees like a real company. Multiple specialized AI agents communicate asynchronously to generate complete applications - from planning to code to deployment.
 
 ## Features
 
@@ -28,7 +30,7 @@ python apps/face_detection_app/scripts/build_app.py
 
 **Note:** The OpenAI API key can be set via:
 1. Environment variable: `export OPENAI_API_KEY='your-key'` (recommended)
-2. Or directly in `agent_framework/config.py`
+2. Or directly in `build_my_startup/config.py`
 
 ## Components
 
@@ -65,8 +67,8 @@ This system enables multiple AI agents (like Cursor's coding assistants) to coll
 
 ### Use Case 1: Multi-Agent Code Development
 ```python
-from agent_framework.ai_agent import CodeWriterAgent, CodeReviewAgent
-from agent_framework.message_bus import MessageBus
+from build_my_startup.ai_agent import CodeWriterAgent, CodeReviewAgent
+from build_my_startup.message_bus import MessageBus
 
 bus = MessageBus()
 writer = CodeWriterAgent(name="Writer", message_bus=bus)
@@ -98,7 +100,7 @@ Agents discuss and refine solutions together asynchronously:
 
 ```python
 import asyncio
-from agent_framework.agent import Agent
+from build_my_startup.agent import Agent
 
 async def main():
     alice = Agent(name="Alice")
@@ -123,8 +125,8 @@ asyncio.run(main())
 ### AI Agents (Ready to Use)
 
 ```python
-from agent_framework.ai_agent import CodeWriterAgent, CodeReviewAgent
-from agent_framework.message_bus import MessageBus
+from build_my_startup.ai_agent import CodeWriterAgent, CodeReviewAgent
+from build_my_startup.message_bus import MessageBus
 
 bus = MessageBus()
 

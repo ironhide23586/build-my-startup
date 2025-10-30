@@ -3,10 +3,10 @@ Example: Multiple Cursor-like AI agents collaborating on a coding task.
 This demonstrates how multiple AI agents can work together asynchronously.
 """
 import asyncio
-from agent_framework.message_bus import MessageBus
-from agent_framework.ai_agent import AIAgent, CodeReviewAgent, CodeWriterAgent, TestWriterAgent
-from agent_framework.agent import Message
-from agent_framework.workflow_utils import TaskTracker, wait_for_completion
+from build_my_startup.message_bus import MessageBus
+from build_my_startup.ai_agent import AIAgent, CodeReviewAgent, CodeWriterAgent, TestWriterAgent
+from build_my_startup.agent import Message
+from build_my_startup.workflow_utils import TaskTracker, wait_for_completion
 
 
 async def cursor_agents_workflow():
@@ -148,7 +148,7 @@ async def parallel_agents_demo():
     bus = MessageBus()
     
     # Create coordinator
-    from agent_framework.agent import Agent
+    from build_my_startup.agent import Agent
     coordinator = Agent(name="Coordinator")
     bus.register_agent(coordinator)
     

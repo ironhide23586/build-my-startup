@@ -2,7 +2,7 @@
 Simple test - verify agents can generate responses with OpenAI.
 """
 import asyncio
-from agent_framework.ai_agent import AIAgent, CodeWriterAgent
+from build_my_startup.ai_agent import AIAgent, CodeWriterAgent
 
 
 async def test_agent_generation():

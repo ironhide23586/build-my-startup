@@ -2,8 +2,8 @@
 Test basic agent messaging without OpenAI to verify communication works.
 """
 import asyncio
-from agent_framework.message_bus import MessageBus
-from agent_framework.agent import Agent, Message
+from build_my_startup.message_bus import MessageBus
+from build_my_startup.agent import Agent, Message
 
 
 async def test_basic_messaging():

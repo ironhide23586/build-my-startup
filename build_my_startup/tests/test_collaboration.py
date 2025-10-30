@@ -2,9 +2,9 @@
 Test multi-agent collaboration with real OpenAI API calls.
 """
 import asyncio
-from agent_framework.message_bus import MessageBus
-from agent_framework.ai_agent import CodeWriterAgent, CodeReviewAgent
-from agent_framework.agent import Message
+from build_my_startup.message_bus import MessageBus
+from build_my_startup.ai_agent import CodeWriterAgent, CodeReviewAgent
+from build_my_startup.agent import Message
 
 
 async def test_real_collaboration():
@@ -16,7 +16,7 @@ async def test_real_collaboration():
     bus = MessageBus()
     
     # Create a coordinator agent (simple agent, no AI needed)
-    from agent_framework.agent import Agent
+    from build_my_startup.agent import Agent
     coordinator = Agent(name="Coordinator")
     bus.register_agent(coordinator)
     

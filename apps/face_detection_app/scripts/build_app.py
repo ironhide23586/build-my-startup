@@ -11,8 +11,8 @@ import sys
 # Add parent directories to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../..')))
 
-from agent_framework.pipelines.standard_build import StandardBuildPipeline, BuildConfig
-from agent_framework.paths import default_app_paths
+from build_my_startup.pipelines.standard_build import StandardBuildPipeline, BuildConfig
+from build_my_startup.paths import default_app_paths
 
 
 # Get output paths for this app
@@ -97,14 +97,14 @@ async def main():
     print("=" * 70)
     
     # Check for OpenAI API key (env var or config file)
-    from agent_framework.config import OPENAI_API_KEY as CONFIG_KEY
+    from build_my_startup.config import OPENAI_API_KEY as CONFIG_KEY
     api_key = os.getenv("OPENAI_API_KEY") or CONFIG_KEY
     
     if not api_key:
         print("\n❌ ERROR: OpenAI API key not found!")
         print("=" * 70)
         print("Please set your OpenAI API key:")
-        print("  1. In agent_framework/config.py, or")
+        print("  1. In build_my_startup/config.py, or")
         print("  2. Via: export OPENAI_API_KEY='your-api-key-here'")
         print("=" * 70)
         sys.exit(1)

@@ -2,8 +2,8 @@
 Example: Multiple agents having asynchronous conversations.
 """
 import asyncio
-from agent_framework.agent import Agent, Message
-from agent_framework.message_bus import MessageBus
+from build_my_startup.agent import Agent, Message
+from build_my_startup.message_bus import MessageBus
 
 
 async def agent_conversation_demo():
