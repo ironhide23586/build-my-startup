@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-framework-a2a"
+version = "0.1.0"
+description = "Asynchronous multi-agent framework with AI agent integration and task orchestration"
+authors = [{ name = "souhamb" }]
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+keywords = ["agents", "asyncio", "message bus", "openai", "workflow"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent"
+]
+
+dependencies = [
+  "openai>=1.0.0",
+  "flask>=3.0.0",
+]
+
+[project.urls]
+Homepage = "https://example.com"
+
+[tool.setuptools]
+packages = ["agent_framework"]
+include-package-data = true
+
+[project.scripts]
+af-example = "agent_framework.__init__:print"

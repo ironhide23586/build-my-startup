@@ -1,0 +1,6 @@
+# Requirements for multi-agent async communication system
+# Python 3.7+ is required for asyncio support
+
+# Optional: For AI-powered agents
+openai>=1.0.0
+
