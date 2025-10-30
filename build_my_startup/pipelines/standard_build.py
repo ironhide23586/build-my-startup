@@ -897,8 +897,11 @@ Generate a comprehensive fix description."""
             
             # Save files
             saved_count = 0
+            skipped_count = 0
             os.makedirs(self.config.templates_dir, exist_ok=True)
             os.makedirs(self.config.static_dir, exist_ok=True)
+            
+            print(f"\n💾 Saving {len(self.generated_files)} generated files...", flush=True)
             
             for task_name, code in self.generated_files.items():
                 file_path = os.path.join(self.config.output_dir, task_name)
@@ -907,6 +910,8 @@ Generate a comprehensive fix description."""
                 
                 safe, violations = is_safe_code(task_name, code)
                 if not safe:
+                    print(f"⚠️  Skipping {task_name}: unsafe code - {violations}", flush=True)
+                    skipped_count += 1
                     continue
                 
                 file_dir = os.path.dirname(file_path)
@@ -917,8 +922,12 @@ Generate a comprehensive fix description."""
                     with open(file_path, "w", encoding="utf-8") as f:
                         f.write(code)
                     saved_count += 1
-                except Exception:
-                    pass
+                    print(f"✅ Saved: {task_name}", flush=True)
+                except Exception as e:
+                    print(f"❌ Failed to save {task_name}: {e}", flush=True)
+            
+            if skipped_count > 0:
+                print(f"\n⚠️  Warning: {skipped_count} files skipped due to safety checks", flush=True)
             
             # Final batch commit
             if self.git_manager and saved_count > 0:
