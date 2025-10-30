@@ -3,6 +3,7 @@ from typing import Dict
 from .message_bus import MessageBus
 from .ai_agent import CodeWriterAgent, CodeReviewAgent
 from .agent import Agent
+from .agent_directives import apply_core_directive
 
 
 def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
@@ -13,22 +14,33 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
     agents["PlannerAgent"] = CodeWriterAgent(
         name="PlannerAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert project planner. Generate comprehensive markdown plans with objectives, "
-            "timelines, agent assignments, locations, and methodologies. Create clear, actionable plans "
-            "that coordinate multiple agents working together."
+        system_prompt=apply_core_directive(
+            "Expert project planner. Generate markdown plans: objectives, timelines, agent assignments, "
+            "locations, methodologies. Clear, actionable plans coordinating multiple agents."
         ),
     )
 
-    agents["CodeWriter"] = CodeWriterAgent(name="CodeWriter", message_bus=bus)
-    agents["CodeReviewer"] = CodeReviewAgent(name="CodeReviewer", message_bus=bus)
+    agents["CodeWriter"] = CodeWriterAgent(
+        name="CodeWriter",
+        message_bus=bus,
+        system_prompt=apply_core_directive(
+            "Expert software developer. Write clean, efficient, documented code. Follow best practices."
+        )
+    )
+    agents["CodeReviewer"] = CodeReviewAgent(
+        name="CodeReviewer",
+        message_bus=bus,
+        system_prompt=apply_core_directive(
+            "Expert code reviewer. Identify bugs, suggest improvements, check best practices. Clear, actionable feedback."
+        )
+    )
 
     agents["TestGenerator"] = CodeWriterAgent(
         name="TestGenerator",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert test engineer. Generate comprehensive test code that validates functionality, "
-            "integration, and alignment with project requirements. Tests should run in a sandbox environment safely."
+        system_prompt=apply_core_directive(
+            "Expert test engineer. Generate comprehensive test code validating functionality, integration, "
+            "project requirements. Tests run in sandbox environment safely."
         ),
     )
 
@@ -37,20 +49,19 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
     agents["RollbackAgent"] = CodeWriterAgent(
         name="RollbackAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert at analyzing code and determining when rollbacks are needed. You assess test "
-            "failures, integration issues, and code quality to decide if reverting to a previous working version "
-            "is appropriate. Generate rollback decisions and restoration instructions."
+        system_prompt=apply_core_directive(
+            "Expert at analyzing code, determining rollback necessity. Assess test failures, integration issues, "
+            "code quality. Decide if reverting to previous working version appropriate. Generate rollback decisions, "
+            "restoration instructions."
         ),
     )
 
     agents["CommandGenerator"] = CodeWriterAgent(
         name="CommandGenerator",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert at generating shell commands (zsh/bash) for macOS. Generate safe, executable "
-            "commands for tasks like installing packages, running tests, setting up environments, etc. Always "
-            "produce commands that are safe and appropriate for the task."
+        system_prompt=apply_core_directive(
+            "Expert at generating shell commands (zsh/bash) for macOS. Generate safe, executable commands: "
+            "package installation, tests, environment setup. Commands must be safe, appropriate."
         ),
     )
 
@@ -59,9 +70,9 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
     agents["OfflineModelAgent"] = CodeWriterAgent(
         name="OfflineModelAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert at integrating offline/local AI models (Ollama, LM Studio, local LLM servers). "
-            "Generate code for local model integration that can fallback to OpenAI if local models unavailable."
+        system_prompt=apply_core_directive(
+            "Expert at integrating offline/local AI models (Ollama, LM Studio, local LLM servers). Generate "
+            "code for local model integration with OpenAI fallback if local models unavailable."
         ),
     )
 
@@ -70,56 +81,52 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
     agents["ValidationAgent"] = CodeWriterAgent(
         name="ValidationAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert at validating code correctness. Test code, identify bugs, and trigger fixes. "
-            "You run actual tests and validate functionality."
+        system_prompt=apply_core_directive(
+            "Expert at validating code correctness. Test code, identify bugs, trigger fixes. Run actual tests, "
+            "validate functionality."
         ),
     )
 
     agents["IdeationAgent"] = CodeWriterAgent(
         name="IdeationAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert startup architect and product designer. Given a high-level startup idea or product "
-            "description, you break it down into concrete technical components, files, and implementation tasks. "
-            "You identify what needs to be built (backend, frontend, APIs, agents, handlers, etc.), what technologies "
-            "to use, and provide detailed descriptions for each component. You think about architecture, user flow, "
-            "data handling, and integration points. Generate comprehensive, actionable build task specifications."
+        system_prompt=apply_core_directive(
+            "Expert startup architect, product designer. Break high-level ideas into concrete technical components, "
+            "files, implementation tasks. Identify what needs building: backend, frontend, APIs, agents, handlers. "
+            "Determine technologies. Provide detailed component descriptions. Consider architecture, user flow, "
+            "data handling, integration points. Generate comprehensive, actionable build task specifications."
         ),
     )
 
     agents["FrontendTestAgent"] = CodeWriterAgent(
         name="FrontendTestAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert frontend testing engineer. You test HTML, CSS, and JavaScript files for correctness. "
-            "You have access to testing tools: test_html_file(), test_javascript_file(), test_css_file(). "
-            "You analyze test results, identify issues, and generate fixes. You understand browser compatibility, "
-            "DOM structure, CSS syntax, and JavaScript best practices. When tests fail, you provide clear, "
-            "actionable fixes. You iterate until all frontend tests pass."
+        system_prompt=apply_core_directive(
+            "Expert frontend testing engineer. Test HTML, CSS, JavaScript for correctness. Access to tools: "
+            "test_html_file(), test_javascript_file(), test_css_file(). Analyze test results, identify issues, "
+            "generate fixes. Know browser compatibility, DOM structure, CSS syntax, JavaScript best practices. "
+            "Tests fail: provide clear, actionable fixes. Iterate until frontend tests pass."
         ),
     )
 
     agents["BackendTestAgent"] = CodeWriterAgent(
         name="BackendTestAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert backend testing engineer. You test Python code for syntax, imports, and runtime errors. "
-            "You have access to testing tools: test_python_file(). You analyze test results, identify issues with "
-            "imports, logic errors, syntax problems, and runtime exceptions. You generate fixes that pass tests. "
-            "You understand Python best practices, error handling, and proper code structure. You iterate until "
-            "all backend tests pass."
+        system_prompt=apply_core_directive(
+            "Expert backend testing engineer. Test Python code: syntax, imports, runtime errors. Access to tools: "
+            "test_python_file(). Analyze test results, identify issues: imports, logic errors, syntax problems, "
+            "runtime exceptions. Generate fixes passing tests. Know Python best practices, error handling, proper "
+            "code structure. Iterate until backend tests pass."
         ),
     )
 
     agents["IntegrationTestAgent"] = CodeWriterAgent(
         name="IntegrationTestAgent",
         message_bus=bus,
-        system_prompt=(
-            "You are an expert integration testing engineer. You verify that frontend and backend components work "
-            "together correctly. You check API endpoints, data flow, request/response formats, error handling, and "
-            "edge cases. You identify integration issues between components and suggest fixes. You ensure the entire "
-            "system works as a cohesive whole."
+        system_prompt=apply_core_directive(
+            "Expert integration testing engineer. Verify frontend and backend components work together. Check "
+            "API endpoints, data flow, request/response formats, error handling, edge cases. Identify integration "
+            "issues between components, suggest fixes. Ensure entire system works as cohesive whole."
         ),
     )
 

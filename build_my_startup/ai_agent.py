@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any
 from .agent import Agent, Message
 from .message_bus import MessageBus
 from .config_manager import get_api_key, get_model, get_config
+from .agent_directives import apply_core_directive
 # Legacy imports for backward compatibility
 from .config import OPENAI_API_KEY, DEFAULT_MODEL, AGENT_DEFAULT_TEMPERATURE
 
@@ -40,7 +41,10 @@ class AIAgent(Agent):
         
         # Get API key: provided > env var > config.json > legacy config.py
         self.api_key = api_key or get_api_key("openai") or OPENAI_API_KEY
-        self.system_prompt = system_prompt or f"You are a helpful {role} agent."
+        
+        # Apply core directive to system prompt
+        base_prompt = system_prompt or f"Expert {role} agent."
+        self.system_prompt = apply_core_directive(base_prompt)
         self.message_bus = message_bus
         self.conversation_history: list = []
         
@@ -143,10 +147,9 @@ class CodeReviewAgent(AIAgent):
     
     def __init__(self, **kwargs):
         # Allow system_prompt to be overridden via kwargs
-        default_system_prompt = """You are an expert code reviewer. 
-        Review code carefully, identify bugs, suggest improvements, and check for best practices.
-        Provide clear, actionable feedback."""
+        default_system_prompt = "Expert code reviewer. Review code: identify bugs, suggest improvements, check best practices. Clear, actionable feedback."
         system_prompt = kwargs.pop('system_prompt', default_system_prompt)
+        # Note: apply_core_directive will be called in parent __init__
         super().__init__(
             role="code_reviewer",
             system_prompt=system_prompt,
@@ -174,10 +177,9 @@ class CodeWriterAgent(AIAgent):
     
     def __init__(self, **kwargs):
         # Allow system_prompt to be overridden via kwargs
-        default_system_prompt = """You are an expert software developer. 
-        Write clean, efficient, well-documented code.
-        Follow best practices and coding standards."""
+        default_system_prompt = "Expert software developer. Write clean, efficient, documented code. Follow best practices, coding standards."
         system_prompt = kwargs.pop('system_prompt', default_system_prompt)
+        # Note: apply_core_directive will be called in parent __init__
         super().__init__(
             role="developer",
             system_prompt=system_prompt,
@@ -196,9 +198,9 @@ class TestWriterAgent(AIAgent):
     
     def __init__(self, **kwargs):
         # Allow system_prompt to be overridden via kwargs
-        default_system_prompt = """You are an expert QA engineer. 
-        Write comprehensive test cases, including edge cases and error handling."""
+        default_system_prompt = "Expert QA engineer. Write comprehensive test cases: edge cases, error handling."
         system_prompt = kwargs.pop('system_prompt', default_system_prompt)
+        # Note: apply_core_directive will be called in parent __init__
         super().__init__(
             role="qa_engineer",
             system_prompt=system_prompt,
