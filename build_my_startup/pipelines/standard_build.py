@@ -15,6 +15,7 @@ from ..sandbox import prepend_test_setup, run_python
 from ..command_exec import execute_command_safe
 from ..code_safety import is_safe_code
 from ..pretty_print import print_code, print_review, print_status
+from ..progress import ProgressSpinner, print_step
 
 
 @dataclass
@@ -142,7 +143,9 @@ CRITICAL FORMATTING REQUIREMENTS:
 
 Output ONLY the file contents."""
             
-            code = await writer.write_code(enhanced_description)
+            print_step(f"🤖 Generating code for: {task}", substep=True)
+            with ProgressSpinner(f"Writing {task}"):
+                code = await writer.write_code(enhanced_description)
             
             # Pretty print the generated code
             print_status(f"\n✨ Generated code for: {task}", "success")
@@ -285,7 +288,9 @@ Fix the code to make tests pass and ensure proper integration."""
                 if not is_fix:
                     state_info["state"] = "reviewing"
             
-            review = await reviewer.review_code(code, writer.agent_id)
+            print_step(f"🔍 Reviewing code for: {file_task}", substep=True)
+            with ProgressSpinner(f"Reviewing {file_task}"):
+                review = await reviewer.review_code(code, writer.agent_id)
             
             # Pretty print the code review
             print_status(f"\n📝 Code review completed for: {file_task}", "info")
@@ -347,7 +352,9 @@ Code Review feedback:
 
 Generate complete test code ready to execute."""
             
-            test_code = await test_generator.write_code(test_description)
+            print_step(f"🧪 Generating tests for: {file_task}", substep=True)
+            with ProgressSpinner(f"Creating tests for {file_task}"):
+                test_code = await test_generator.write_code(test_description)
             self.test_files[file_task] = test_code
             self.tracker.complete_task(test_task_id)
             
@@ -401,7 +408,9 @@ Generate complete test code ready to execute."""
                     )
                 
                 prepend_test_setup(test_file_path, self.config.output_dir, self.sandbox_dir)
-                rc, out, err = run_python(test_file_path, self.sandbox_dir, timeout=30)
+                print_step(f"▶️  Running tests for: {file_task}", substep=True)
+                with ProgressSpinner(f"Testing {file_task}"):
+                    rc, out, err = run_python(test_file_path, self.sandbox_dir, timeout=30)
                 result["output"] = out
                 result["errors"] = err
                 result["passed"] = rc == 0
@@ -788,7 +797,11 @@ Generate a comprehensive fix description."""
                 )
             
             # Request code generation
+            print(f"\n🚀 Building {len(build_tasks)} components...\n")
             for idx, task_info in enumerate(build_tasks, 1):
+                task_name = task_info.get("task", "unknown")
+                print(f"\n📦 Component {idx}/{len(build_tasks)}: {task_name}")
+                print("─" * 50)
                 await self.bus.send_to_agent(
                     self.agents["Coordinator"].agent_id,
                     self.agents["CodeWriter"].agent_id,

@@ -32,6 +32,41 @@ python apps/face_detection_app/scripts/build_app.py
 1. Environment variable: `export OPENAI_API_KEY='your-key'` (recommended)
 2. Or directly in `build_my_startup/config.py`
 
+## 🚀 Adaptive Build Pipeline (NEW!)
+
+**Describe your startup in plain English - AI agents figure out the rest!**
+
+The Adaptive Build Pipeline uses AI agents to automatically infer what needs to be built from a high-level description. No need to specify exact files or architectures - just describe your idea.
+
+```python
+from build_my_startup.pipelines.adaptive_build import build_adaptive_sync
+
+# Just describe what you want to build!
+result = build_adaptive_sync(
+    description="""
+    I want to build an AI-powered image commentary generator.
+    Users upload images and get intelligent commentary using OpenAI Vision API.
+    Should have a beautiful web UI and run on Mac.
+    """,
+    output_dir="./generated",
+    target_platform="macOS",
+    tech_preferences={"framework": "Flask"}
+)
+```
+
+**What happens automatically:**
+1. 🧠 **IdeationAgent** analyzes your description and identifies components needed
+2. 🏗️ **CodeWriter** generates code for each component
+3. 🔍 **CodeReviewer** reviews the generated code
+4. 🧪 **TestGenerator** creates tests for validation
+5. ✅ **TestRunner** executes tests and ensures everything works
+6. 📋 **PlannerAgent** creates project documentation
+
+**Examples:**
+- `examples/simple_adaptive_build.py` - Simple CLI tool from description
+- `apps/commentary_app/scripts/build_app.py` - Full web app from high-level idea
+- `apps/face_detection_app/scripts/build_app.py` - Structured build with explicit tasks
+
 ## Components
 
 ### 1. Agent (`agent.py`)

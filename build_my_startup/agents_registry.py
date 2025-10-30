@@ -76,6 +76,18 @@ def create_default_agents(bus: MessageBus) -> Dict[str, Agent]:
         ),
     )
 
+    agents["IdeationAgent"] = CodeWriterAgent(
+        name="IdeationAgent",
+        message_bus=bus,
+        system_prompt=(
+            "You are an expert startup architect and product designer. Given a high-level startup idea or product "
+            "description, you break it down into concrete technical components, files, and implementation tasks. "
+            "You identify what needs to be built (backend, frontend, APIs, agents, handlers, etc.), what technologies "
+            "to use, and provide detailed descriptions for each component. You think about architecture, user flow, "
+            "data handling, and integration points. Generate comprehensive, actionable build task specifications."
+        ),
+    )
+
     return agents
 
 
